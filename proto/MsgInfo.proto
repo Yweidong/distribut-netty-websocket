@@ -1,0 +1,15 @@
+syntax="proto3";
+
+package org.example.msg;
+
+option java_package="org.example.msg";
+
+option java_outer_classname="MsgInfo";
+
+option java_multiple_files=true;
+
+message MsgBody {
+
+  string channelId = 1;
+  string msgInfo = 2;
+}

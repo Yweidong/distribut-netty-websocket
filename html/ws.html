@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+ 
+<html>
+ 
+<head>
+ 
+<meta charset="UTF-8">
+ 
+<title>WebSocket Chat</title>
+ 
+<script type="text/javascript" src="../js/bundle.js"></script>
+    
+
+
+
+
+
+ 
+</head>
+ 
+<body>
+ 
+   <form onsubmit="return false;">
+ 
+      <h3>WebSocket 聊天室：</h3>
+ 
+      <textarea id="responseText" style="width: 500px; height: 300px;"></textarea>
+ 
+      <br>
+ 
+      <input type="text" name="message"  style="width: 300px" value="Welcome to www.waylau.com">
+ 
+      <input type="button" value="发送消息" onclick="send(this.form.message.value)">
+ 
+      <input type="button" onclick="javascript:document.getElementById('responseText').value=''" value="清空聊天记录">
+ 
+   </form>
+ 
+   <br>
+ 
+   <br>
+ 
+</body>
+ 
+<script type="text/javascript">
+ 
+      var socket = null;
+ 
+      if (!window.WebSocket) {
+ 
+         window.WebSocket = window.MozWebSocket;
+ 
+      }
+ 
+      if (window.WebSocket) {
+ 
+         socket = new WebSocket("ws://localhost:8080/websocket");
+ 
+         socket.binaryType = "arraybuffer";
+ 
+         socket.onmessage = function(event) {
+ 
+            var ta = document.getElementById('responseText');
+ 
+            if (event.data instanceof ArrayBuffer){
+ 
+               
+                   
+                    
+                     var msg =   proto.org.example.wsmessage.Model.deserializeBinary(event.data);      //如果后端发送的是二进制帧（protobuf）会收到前面定义的类型
+                        console.log(msg.getContent())
+
+        
+                      
+                     var msgCon=proto.org.example.wsmessage.MessageBody.deserializeBinary(msg.getContent());
+                    console.log(msgCon)
+ 
+                ta.value = ta.value + '\n' + msgCon.getContent();
+ 
+            }else {
+ 
+                   var data = event.data;                //后端返回的是文本帧时触发
+ 
+                  ta.value = ta.value + '\n' + data;
+ 
+               }
+ 
+         };
+ 
+         socket.onopen = function(event) {
+ 
+            var ta = document.getElementById('responseText');
+ 
+            ta.value = "连接开启!";
+
+ 
+              setInterval(keepalive,50000);
+ 
+              var messageModel = new proto.org.example.wsmessage.Model();
+
+               console.log(randomfunc());
+              messageModel.setFrom("111");
+
+              messageModel.setCmd(proto.org.example.wsmessage.CmdType.WEBSOCKET_ONLINE);
+
+
+              socket.send(messageModel.serializeBinary());
+ 
+         };
+
+        
+        let randomfunc = function() {
+
+
+
+            return Math.random().toString(36).substr(3,10);
+        }
+
+        let keepalive =  function() {
+
+            console.log("心跳包")
+            var messageModel = new proto.org.example.wsmessage.Model();
+ 
+              messageModel.setCmd(proto.org.example.wsmessage.CmdType.WEBSOCKET_HEARBEAT);
+
+            socket.send(messageModel.serializeBinary());
+        }
+ 
+         socket.onclose = function(event) {
+ 
+            var ta = document.getElementById('responseText');
+ 
+            ta.value = ta.value + "\n连接被关闭";
+ 
+           
+ 
+            var messageModel = new proto.org.example.wsmessage.Model();
+ 
+              messageModel.setCmd(proto.org.example.wsmessage.CmdType.WEBSOCKET_OFFLINE);
+ 
+              socket.send(messageModel.serializeBinary());
+ 
+         };
+ 
+      } else {
+ 
+         alert("你的浏览器不支持 WebSocket！");
+ 
+      }
+ 
+   
+
+      function send(message) {
+ 
+         if (!window.WebSocket) {
+ 
+            return;
+ 
+         }
+        console.log(socket.readyState)
+        console.log(WebSocket.OPEN)
+         if (socket.readyState == WebSocket.OPEN) {
+          
+            //var fullMessage = '{"id":1,"toUser":"1,2,3","message":"'+message+'"}';
+ 
+            //socket.send(fullMessage);
+ 
+            var messageModel = new proto.org.example.wsmessage.Model();
+ 
+            var content = new proto.org.example.wsmessage.MessageBody();
+ 
+            messageModel.setFrom("111");
+            messageModel.setTo("222");
+ 
+              content.setContent(message);
+
+ 
+             messageModel.setContent(content.serializeBinary());
+            messageModel.setCmd(proto.org.example.wsmessage.CmdType.WEBSOCKET_DATA)
+ 
+              socket.send(messageModel.serializeBinary());
+ 
+         } else {
+ 
+            alert("连接没有开启.");
+ 
+         }
+ 
+      }
+ 
+   </script>
+ 
+</html>
+

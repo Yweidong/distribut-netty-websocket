@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package com.thought.monkey.wsmessage;
+
+option java_package = "com.thought.monkey.wsmessage";
+
+option java_outer_classname = "MessageInfo";
+
+
+enum CmdType {
+    WEBSOCKET_ONLINE = 0;//上线
+    WEBSOCKET_OFFLINE = 1;//下线
+    WEBSOCKET_HEARBEAT =2; //心跳
+    WEBSOCKET_DATA = 3; //数据
+    MESSAGE_NOTIFICATION = 4; //通知
+}
+
+
+
+
+message Model {
+
+
+    CmdType cmd = 1; //请求命令 0 上线，1下线 2 心跳 3数据 4 通知
+
+    string from = 2; //发送人
+
+    string to = 3; //接受人
+
+    string groupId = 4;//组编号
+
+    bytes content = 5; //发送的内容
+
+
+}
+
+message MessageBody {
+    string  title = 1; //发送标题
+
+    string content = 2; //内容
+
+    string time = 3;//发送时间
+
+    uint32 type = 4;//0文字 1 文件
+
+    string extend = 5;//扩展字段
+}

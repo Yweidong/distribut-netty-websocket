@@ -1,0 +1,8 @@
+protoc --java_out=src/main/java ./proto/Message.proto
+
+#前端js
+protoc --js_out=import_style=commonjs,binary:. ./proto/Message.proto
+
+
+
+browserify export.js > bundle.js
